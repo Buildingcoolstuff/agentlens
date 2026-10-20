@@ -1,0 +1,63 @@
+{
+  "$schema": "https://agentlens.dev/schema/facts.config.v1.json",
+  "version": "1.0",
+  "site": {
+    "canonicalDomain": "https://garuda.shoes",
+    "defaultLocale": "en-US",
+    "robotsMode": "permissive"
+  },
+  "entity": {
+    "id": "https://garuda.shoes/#organization",
+    "name": "Garuda Athletics",
+    "legalName": "Garuda Athletics Technologies Inc.",
+    "url": "https://garuda.shoes",
+    "logo": "https://garuda.shoes/logo.png",
+    "foundingDate": "2024-01-01",
+    "countryOfOrigin": "US",
+    "sameAs": [
+      "https://www.wikidata.org/entity/Q11000000",
+      "https://github.com/Buildingcoolstuff/agentlens"
+    ]
+  },
+  "offerings": [
+    {
+      "id": "prod-garuda-velocity-x9",
+      "name": "Garuda Velocity X9",
+      "category": "Footwear > Running Shoes",
+      "price": 249,
+      "priceCurrency": "USD",
+      "availability": "InStock",
+      "asOf": "2026-01-01",
+      "quotableSummary": "Garuda Velocity X9 is a carbon-plated marathon road racing shoe engineered for distance runners, featuring a 40mm heel stack, weighing 198g, and priced at 249 USD for dry pavement competition.",
+      "specs": {
+        "weight": "198g",
+        "stackHeight": "40mm",
+        "plateType": "Full-length carbon fiber"
+      }
+    }
+  ],
+  "ncs": {
+    "schemaVersion": "ncs:v1",
+    "constraints": [
+      {
+        "id": "nc-waterproof",
+        "capability": "waterproof",
+        "value": false,
+        "modality": "cannot",
+        "statement": "No. The Garuda Velocity X9 is not waterproof and is engineered strictly for dry road running.",
+        "asOf": "2026-01-01",
+        "reviewBy": "2027-12-31",
+        "evidence": "https://garuda.shoes/specs/velocity-x9",
+        "aliases": ["water resistant", "gore-tex", "submersible", "wet weather"]
+      }
+    ],
+    "closedWorld": [
+      {
+        "class": "Supported Running Surfaces",
+        "exhaustive": true,
+        "members": ["Paved Road", "All-Weather Track"],
+        "asOf": "2026-01-01"
+      }
+    ]
+  }
+}

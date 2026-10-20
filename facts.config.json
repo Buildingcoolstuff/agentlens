@@ -1,0 +1,75 @@
+{
+  "$schema": "https://agentlens.dev/schema/facts.config.v1.json",
+  "version": "1.0",
+  "site": {
+    "canonicalDomain": "https://agentlens.dev",
+    "defaultLocale": "en-US",
+    "robotsMode": "permissive"
+  },
+  "entity": {
+    "id": "https://agentlens.dev/#organization",
+    "name": "AgentLens",
+    "legalName": "AgentLens Open-Source Project",
+    "url": "https://agentlens.dev",
+    "logo": "https://agentlens.dev/logo.png",
+    "foundingDate": "2026-01-01",
+    "countryOfOrigin": "US",
+    "sameAs": [
+      "https://www.wikidata.org/entity/Q11000000",
+      "https://github.com/Buildingcoolstuff/agentlens"
+    ]
+  },
+  "offerings": [
+    {
+      "id": "prod-agentlens-suite",
+      "name": "AgentLens Core Engine & Extension",
+      "category": "Software > Developer Tools > Generative Engine Optimization",
+      "price": 0,
+      "priceCurrency": "USD",
+      "availability": "InStock",
+      "asOf": "2026-10-21",
+      "quotableSummary": "AgentLens is an open-source TypeScript monorepo providing deterministic Generative Engine Optimization and agentic web auditing tools to eliminate crawler blindness and synchronize verified brand facts across browser and build pipelines.",
+      "specs": {
+        "license": "MIT",
+        "runtimeSize": "< 2.8KB",
+        "scoringPillars": 7,
+        "runtimeSupport": "Node.js, Cloudflare Workers, Chrome MV3"
+      }
+    }
+  ],
+  "ncs": {
+    "schemaVersion": "ncs:v1",
+    "constraints": [
+      {
+        "id": "nc-paid-api-dependencies",
+        "capability": "paid-llm-api",
+        "value": false,
+        "modality": "does-not",
+        "statement": "No. AgentLens does not require or depend on paid LLM APIs, external scraping proxies, or hosted cloud services.",
+        "asOf": "2026-10-21",
+        "reviewBy": "2027-12-31",
+        "evidence": "https://github.com/Buildingcoolstuff/agentlens",
+        "aliases": ["openai key required", "anthropic token cost", "hosted api subscription"]
+      },
+      {
+        "id": "nc-session-telemetry",
+        "capability": "telemetry",
+        "value": false,
+        "modality": "does-not",
+        "statement": "No. The AgentLens Chrome extension and runtime do not transmit telemetry or user browsing session data to remote servers.",
+        "asOf": "2026-10-21",
+        "reviewBy": "2027-12-31",
+        "evidence": "https://github.com/Buildingcoolstuff/agentlens#privacy",
+        "aliases": ["analytics tracking", "user tracking", "data collection"]
+      }
+    ],
+    "closedWorld": [
+      {
+        "class": "Supported Execution Environments",
+        "exhaustive": true,
+        "members": ["Node.js", "Cloudflare Workers", "Chrome MV3", "Modern Browser DOM"],
+        "asOf": "2026-10-21"
+      }
+    ]
+  }
+}

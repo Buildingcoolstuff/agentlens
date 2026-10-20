@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Garuda Velocity X9 — Elite Marathon Footwear</title>
+  <meta name="description" content="Garuda Velocity X9 carbon-plated racing shoe engineered for elite marathon distance." />
+  
+  <!-- Intentional Stale & Conflicting JSON-LD to test Pillar 4 & 5 -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Product",
+    "name": "Garuda Velocity X9",
+    "description": "Elite marathon racing shoe",
+    "offers": {
+      "@type": "Offer",
+      "price": "299",
+      "priceCurrency": "USD",
+      "availability": "https://schema.org/InStock"
+    },
+    "dateModified": "2024-01-01T00:00:00Z"
+  }
+  </script>
+
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      margin: 0;
+      padding: 0;
+      background: #0f172a;
+      color: #f8fafc;
+      line-height: 1.6;
+    }
+    header {
+      padding: 24px 32px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .logo {
+      font-size: 20px;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      color: #38bdf8;
+    }
+    main {
+      max-width: 960px;
+      margin: 40px auto;
+      padding: 0 24px;
+    }
+    .badge {
+      display: inline-block;
+      padding: 4px 10px;
+      background: rgba(56, 189, 248, 0.15);
+      border: 1px solid rgba(56, 189, 248, 0.3);
+      color: #38bdf8;
+      border-radius: 9999px;
+      font-size: 12px;
+      font-weight: 600;
+      margin-bottom: 16px;
+    }
+    h1 {
+      font-size: 42px;
+      font-weight: 800;
+      margin: 0 0 16px 0;
+      letter-spacing: -0.03em;
+    }
+    .puffery {
+      font-size: 18px;
+      color: #94a3b8;
+      max-width: 720px;
+    }
+    .card {
+      background: #1e293b;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 12px;
+      padding: 24px;
+      margin: 32px 0;
+    }
+    .btn {
+      background: #38bdf8;
+      color: #0f172a;
+      padding: 12px 24px;
+      border-radius: 8px;
+      font-weight: 700;
+      border: none;
+      cursor: pointer;
+      font-size: 14px;
+    }
+    .testbed-banner {
+      background: #312e81;
+      border: 1px solid #6366f1;
+      padding: 12px 16px;
+      border-radius: 8px;
+      margin-bottom: 24px;
+      font-size: 13px;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="logo">GARUDA ATHLETICS</div>
+    <nav>
+      <a href="#specs" style="color: #94a3b8; text-decoration: none; margin-left: 20px;">Specs</a>
+      <a href="#reviews" style="color: #94a3b8; text-decoration: none; margin-left: 20px;">Reviews</a>
+    </nav>
+  </header>
+
+  <main data-agent-section="main">
+    <div class="testbed-banner">
+      ⚡ <strong>AgentLens Testbed Storefront</strong>: Contains intentional Next.js streaming suspense traps, price ghost elements, and marketing puffery. Open the <strong>AgentLens Chrome Extension</strong> and click <strong>"Highlight Ghosts"</strong> to inspect.
+    </div>
+
+    <span class="badge">Next-Gen Road Racing</span>
+    <h1>Garuda Velocity X9</h1>
+
+    <!-- Marketing Puffery Lexicon with Bare Pronouns -->
+    <p class="puffery">
+      It is a revolutionary, world-class, seamless running experience powered by cutting-edge synergy. They offer disruptive propulsion that effortlessly transforms your marathon stride into pure magic.
+    </p>
+
+    <!-- Intentional Next.js Suspense Traps (hidden in raw SSR stream) -->
+    <div hidden id="S:garuda-price-stream">
+      <div class="price-container">
+        <span class="currency">$</span><span class="amount">249.00</span>
+      </div>
+    </div>
+    <template id="B:garuda-spec-fallback">
+      <div>Loading carbon plate specifications...</div>
+    </template>
+
+    <div class="card" data-agent-section="specs">
+      <h2>Technical Specifications</h2>
+      <p id="hydrated-specs">
+        <!-- Injected via client JS below to create Ghost Elements -->
+        Loading live specifications from client-side script...
+      </p>
+      <button class="btn" id="cta-button">Order Now — $249</button>
+    </div>
+  </main>
+
+  <!-- Simulated Client-Side Hydration script -->
+  <script>
+    // Simulate Next.js client hydration running after initial SSR fetch
+    setTimeout(() => {
+      const specEl = document.getElementById('hydrated-specs');
+      if (specEl) {
+        specEl.innerHTML = `
+          <strong>Weight:</strong> 198g (Men's US 9)<br/>
+          <strong>Heel Stack:</strong> 40mm / Drop: 8mm<br/>
+          <strong>Price:</strong> <span style="color:#38bdf8; font-weight: bold;">$249.00 USD</span><br/>
+          <strong>Surface:</strong> Paved Dry Road (NOT Waterproof)<br/>
+          <strong>Availability:</strong> 14 pairs in stock
+        `;
+      }
+    }, 100);
+  </script>
+
+  <!-- Include AgentLens Zero-CLS Continuity Bar & WebMCP Runtime -->
+  <script src="../../packages/runtime/dist/continuity.iife.js"></script>
+</body>
+</html>
