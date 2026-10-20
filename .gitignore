@@ -46,3 +46,9 @@ Thumbs.db
 # Test coverage
 coverage
 .nyc_output
+
+# Local Architecture & Audit Reports (Private to local)
+AGENTLENS_ARGO_ARCHITECTURE_REPORT.md
+AGENTLENS_MASTER_ARCHITECTURE.md
+*ARCHITECTURE*.md
+*ARGO*.md
