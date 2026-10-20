@@ -1,0 +1,31 @@
+{
+  "name": "@agentlens/mcp",
+  "version": "1.0.0",
+  "description": "Local stdio Model Context Protocol (MCP) server for Cursor, Windsurf, and Claude Code.",
+  "bin": {
+    "agentlens-mcp": "./dist/bin.js"
+  },
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "scripts": {
+    "build": "tsup src/bin.ts src/index.ts --format cjs,esm --dts",
+    "dev": "tsup src/bin.ts src/index.ts --format cjs,esm --dts --watch",
+    "check-types": "tsc --noEmit",
+    "clean": "rimraf dist"
+  },
+  "dependencies": {
+    "@agentlens/core": "workspace:*",
+    "@agentlens/schema": "workspace:*",
+    "@modelcontextprotocol/sdk": "^1.6.1",
+    "zod": "^3.24.2"
+  },
+  "devDependencies": {
+    "@types/node": "^22.13.0",
+    "rimraf": "^6.0.1",
+    "tsup": "^8.3.6",
+    "typescript": "^5.7.3"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}
