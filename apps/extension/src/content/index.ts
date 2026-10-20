@@ -156,4 +156,6 @@ chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
     sendResponse(scrapeLiveFacts());
     return true;
   }
+
+  return false;
 });

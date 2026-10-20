@@ -3,7 +3,7 @@ import { ChevronDown, ChevronUp, CheckCircle, AlertCircle, Wrench } from 'lucide
 import type { PillarName, PillarScoreBreakdown } from '@agentlens/schema';
 
 interface DiagnosticAccordionProps {
-  pillars: Record<PillarName, PillarScoreBreakdown>;
+  pillars?: Partial<Record<PillarName, PillarScoreBreakdown>> | Record<PillarName, PillarScoreBreakdown>;
 }
 
 const PILLAR_METADATA: Record<PillarName, { title: string; subtitle: string }> = {
@@ -50,8 +50,9 @@ export const DiagnosticAccordion: React.FC<DiagnosticAccordionProps> = ({ pillar
         7-Pillar Diagnostic Breakdown
       </h3>
 
-      {(Object.keys(pillars) as PillarName[]).map((key) => {
-        const pillar = pillars[key];
+      {(Object.keys(PILLAR_METADATA) as PillarName[]).map((key) => {
+        const pillar = pillars?.[key];
+        if (!pillar) return null;
         const meta = PILLAR_METADATA[key];
         const isOpen = openPillar === key;
 
