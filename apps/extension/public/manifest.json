@@ -1,0 +1,24 @@
+{
+  "manifest_version": 3,
+  "name": "AgentLens — Open-Source GEO & Agentic Web Auditor",
+  "version": "1.0.0",
+  "description": "Dual-Score Engine, Visual Hydration Blindspot Overlay, and 1-Click Fix Bundle Handoff Exporter.",
+  "permissions": ["activeTab", "scripting", "storage"],
+  "host_permissions": ["<all_urls>"],
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "AgentLens GEO Auditor"
+  },
+  "devtools_page": "devtools.html",
+  "background": {
+    "service_worker": "background.js",
+    "type": "module"
+  },
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["content.js"],
+      "run_at": "document_idle"
+    }
+  ]
+}
