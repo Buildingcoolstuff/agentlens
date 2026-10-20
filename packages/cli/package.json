@@ -1,0 +1,32 @@
+{
+  "name": "agentlens",
+  "version": "1.0.0",
+  "description": "The Open-Source Agentic Web & GEO Engine — Audit in the Browser, Compile in the Build, Orient at the Edge.",
+  "bin": {
+    "agentlens": "./dist/bin.js"
+  },
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "scripts": {
+    "build": "tsup src/bin.ts src/index.ts --format cjs,esm --dts",
+    "dev": "tsup src/bin.ts src/index.ts --format cjs,esm --dts --watch",
+    "check-types": "tsc --noEmit",
+    "clean": "rimraf dist"
+  },
+  "dependencies": {
+    "@agentlens/core": "workspace:*",
+    "@agentlens/schema": "workspace:*",
+    "commander": "^13.1.0",
+    "picocolors": "^1.1.1",
+    "zod": "^3.24.2"
+  },
+  "devDependencies": {
+    "@types/node": "^22.13.0",
+    "rimraf": "^6.0.1",
+    "tsup": "^8.3.6",
+    "typescript": "^5.7.3"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}
