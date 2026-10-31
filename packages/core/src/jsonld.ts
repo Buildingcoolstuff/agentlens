@@ -61,6 +61,9 @@ export function extractJsonLdBlocks(html: string): { nodes: JsonLdNode[]; syntax
   let match: RegExpExecArray | null;
   let count = 0;
 
+  // Reset regex state to guarantee idempotence across invocations
+  JSONLD_SCRIPT_REGEX.lastIndex = 0;
+
   while ((match = JSONLD_SCRIPT_REGEX.exec(html)) !== null) {
     count++;
     const rawContent = match[1]?.trim() || '';

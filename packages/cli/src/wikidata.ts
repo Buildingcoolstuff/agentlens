@@ -2,7 +2,7 @@
  * Wikidata Entity Resolver (wikidata.ts)
  *
  * Resolves brand / organization names to authoritative Wikidata Q-IDs
- * via the public Wikidata search API.
+ * via the public Wikidata search API with timeout, retry backoff, and rate-limit handling.
  */
 
 export interface WikidataSearchResult {
@@ -12,7 +12,11 @@ export interface WikidataSearchResult {
   uri: string; // "https://www.wikidata.org/entity/Q105638"
 }
 
-export async function resolveWikidataEntity(brandName: string): Promise<WikidataSearchResult | null> {
+export async function resolveWikidataEntity(
+  brandName: string,
+  retries: number = 2,
+  timeoutMs: number = 5000
+): Promise<WikidataSearchResult | null> {
   const query = brandName.trim();
   if (!query) return null;
 
@@ -20,32 +24,56 @@ export async function resolveWikidataEntity(brandName: string): Promise<Wikidata
     query
   )}&language=en&format=json&origin=*&type=item&limit=5`;
 
-  try {
-    const res = await fetch(url, {
-      headers: {
-        'User-Agent': 'AgentLens-CLI/1.0 (+https://github.com/Buildingcoolstuff/agentlens)',
-      },
-    });
+  for (let attempt = 0; attempt <= retries; attempt++) {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), timeoutMs);
 
-    if (!res.ok) {
-      return null;
-    }
+    try {
+      const res = await fetch(url, {
+        signal: controller.signal,
+        headers: {
+          'User-Agent': 'AgentLens-CLI/1.0 (+https://github.com/Buildingcoolstuff/agentlens)',
+          Accept: 'application/json',
+        },
+      });
 
-    const data = (await res.json()) as {
-      search?: Array<{ id: string; label: string; description?: string }>;
-    };
+      clearTimeout(timeout);
 
-    if (data.search && data.search.length > 0) {
-      const best = data.search[0]!;
-      return {
-        id: best.id,
-        label: best.label,
-        description: best.description || '',
-        uri: `https://www.wikidata.org/entity/${best.id}`,
+      if (res.status === 429) {
+        // Rate limited — back off exponentially
+        if (attempt < retries) {
+          await new Promise((r) => setTimeout(r, 1000 * Math.pow(2, attempt)));
+          continue;
+        }
+        return null;
+      }
+
+      if (!res.ok) {
+        if (attempt < retries) continue;
+        return null;
+      }
+
+      const data = (await res.json()) as {
+        search?: Array<{ id: string; label: string; description?: string }>;
       };
+
+      if (data.search && data.search.length > 0) {
+        const best = data.search[0]!;
+        return {
+          id: best.id,
+          label: best.label,
+          description: best.description || '',
+          uri: `https://www.wikidata.org/entity/${best.id}`,
+        };
+      }
+
+      return null;
+    } catch {
+      clearTimeout(timeout);
+      if (attempt < retries) {
+        await new Promise((r) => setTimeout(r, 500 * Math.pow(2, attempt)));
+      }
     }
-  } catch {
-    // Network / timeout fallback
   }
 
   return null;

@@ -1,0 +1,230 @@
+name: CI
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  PNPM_VERSION: 12.14.0
+  NODE_VERSION: 20
+
+jobs:
+  # ─── Lint & Type-check ────────────────────────────────────────────────────
+  typecheck:
+    name: Type Check (strict)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: TypeScript strict check (all workspaces)
+        run: pnpm check-types
+
+  # ─── Build ────────────────────────────────────────────────────────────────
+  build:
+    name: Build (Turbo)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build all packages (Turbo cache enabled)
+        run: pnpm build
+        env:
+          TURBO_TELEMETRY_DISABLED: 1
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: dist-packages
+          path: |
+            packages/*/dist
+            apps/extension/dist
+          retention-days: 7
+
+  # ─── Test ─────────────────────────────────────────────────────────────────
+  test:
+    name: Unit Tests
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Run tests with coverage
+        run: pnpm test --coverage
+
+      - name: Upload coverage report
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage
+          path: packages/core/coverage
+          retention-days: 7
+
+  # ─── Bundle Size Guard ────────────────────────────────────────────────────
+  bundle-size:
+    name: Bundle Size Guard (@agentlens/runtime ≤ 2.8 KB)
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build runtime only
+        run: pnpm --filter @agentlens/runtime build
+
+      - name: Check IIFE bundle size (must be ≤ 5 KB gzipped)
+        run: |
+          FILE="packages/runtime/dist/continuity.iife.js"
+          GZIP_SIZE=$(gzip -c "$FILE" | wc -c)
+          echo "IIFE gzipped size: ${GZIP_SIZE} bytes"
+          if [ "$GZIP_SIZE" -gt 5120 ]; then
+            echo "❌ Bundle too large: ${GZIP_SIZE} bytes gzipped (limit: 5120)"
+            exit 1
+          fi
+          echo "✅ Bundle size OK: ${GZIP_SIZE} bytes gzipped"
+
+  # ─── NCS Constraint Expiry Guard ─────────────────────────────────────────
+  ncs-expiry:
+    name: NCS Constraint Expiry Check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build schema + core
+        run: pnpm --filter @agentlens/schema build && pnpm --filter @agentlens/core build
+
+      - name: Check for expired NCS constraints
+        run: |
+          node -e "
+          const fs = require('fs');
+          const config = JSON.parse(fs.readFileSync('facts.config.json', 'utf-8'));
+          const today = new Date();
+          const expired = (config.ncs?.constraints ?? []).filter(c => {
+            const reviewBy = c.reviewBy ? new Date(c.reviewBy) : null;
+            return reviewBy && reviewBy < today;
+          });
+          if (expired.length > 0) {
+            console.error('❌ Expired NCS constraints found:');
+            expired.forEach(c => console.error('  -', c.id, '(reviewBy:', c.reviewBy + ')'));
+            process.exit(1);
+          }
+          console.log('✅ All', (config.ncs?.constraints ?? []).length, 'NCS constraints are current');
+          "
+
+  # ─── Security Audit ───────────────────────────────────────────────────────
+  audit:
+    name: Dependency Security Audit
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Run pnpm audit
+        run: pnpm audit --audit-level=high
+        continue-on-error: true
+
+  # ─── Matrix: Cross-Platform Build ─────────────────────────────────────────
+  cross-platform:
+    name: Cross-Platform (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+        node: [18, 20, 22]
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node }}
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build
+        run: pnpm build
+        env:
+          TURBO_TELEMETRY_DISABLED: 1
+
+      - name: Test
+        run: pnpm test

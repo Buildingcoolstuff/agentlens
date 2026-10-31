@@ -88,6 +88,12 @@ const CURRENCY_REGEX = /(?:[\$₹€£¥]\s*\d+(?:[.,]\d+)?|\b\d+(?:[.,]\d+)?\s*
 const ISO_DATE_REGEX = /\b(?:\d{4}-\d{2}-\d{2}|(?:january|february|march|april|may|june|july|august|september|october|november|december)\s+\d{1,2},?\s+\d{4})\b/gi;
 const NCS_BOUNDARY_REGEX = /\b(?:cannot|does not|will not|not for|not available|not compatible|not affiliated|discontinued|dry road only|water resistant only)\b/gi;
 
+// Non-global regex predicates for idempotent sentence tests (avoids RegExp.lastIndex state mutation)
+const testNumericFact = (s: string) => /\b\d+(?:\.\d+)?\s*(?:kg|g|lbs|oz|km|miles|mph|fps|ms|sec|min|hours|gb|tb|mb|mah|wh|v|w|cm|mm|m|%|hz|khz|ghz|k|x)\b/i.test(s);
+const testCurrency = (s: string) => /(?:[\$₹€£¥]\s*\d+(?:[.,]\d+)?|\b\d+(?:[.,]\d+)?\s*(?:usd|eur|inr|gbp)\b)/i.test(s);
+const testIsoDate = (s: string) => /\b(?:\d{4}-\d{2}-\d{2}|(?:january|february|march|april|may|june|july|august|september|october|november|december)\s+\d{1,2},?\s+\d{4})\b/i.test(s);
+const testNcsBoundary = (s: string) => /\b(?:cannot|does not|will not|not for|not available|not compatible|not affiliated|discontinued|dry road only|water resistant only)\b/i.test(s);
+
 const BARE_PRONOUN_STARTERS = /^(it|they|we|this|these|those|its|their|he|she)\b/i;
 
 /**
@@ -212,10 +218,10 @@ export function analyzeQuotability(html: string): QuotabilityAnalysis {
   for (const s of first30Sentences) {
     const wordCount = s.split(/\s+/).length;
     const hasFacts =
-      NUMERIC_FACT_REGEX.test(s) ||
-      CURRENCY_REGEX.test(s) ||
-      ISO_DATE_REGEX.test(s) ||
-      NCS_BOUNDARY_REGEX.test(s);
+      testNumericFact(s) ||
+      testCurrency(s) ||
+      testIsoDate(s) ||
+      testNcsBoundary(s);
     const noPronoun = !BARE_PRONOUN_STARTERS.test(s);
 
     if (wordCount >= 20 && wordCount <= 70 && hasFacts && noPronoun) {

@@ -1,0 +1,73 @@
+name: "\U0001F50D GEO Audit Request"
+description: Request a public Generative Engine Optimization audit for a website
+title: "audit: <domain>"
+labels: ["geo-audit", "community"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## Public GEO Audit Request
+        Request a community GEO audit using AgentLens. Results will be posted publicly in this issue.
+        Run it yourself with `npx agentlens audit <url>` and share the SARIF output here.
+
+  - type: input
+    id: url
+    attributes:
+      label: URL to Audit
+      placeholder: "https://example.com"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: site_type
+    attributes:
+      label: Site Type
+      options:
+        - E-commerce / Shopify / WooCommerce
+        - SaaS / B2B
+        - Blog / Editorial
+        - Documentation site
+        - Marketing / Landing page
+        - Next.js / Nuxt / Astro app
+        - Other
+    validations:
+      required: true
+
+  - type: dropdown
+    id: framework
+    attributes:
+      label: Frontend Framework (if known)
+      options:
+        - Next.js App Router
+        - Next.js Pages Router
+        - Nuxt
+        - Astro
+        - Remix
+        - Gatsby
+        - Plain HTML
+        - Unknown
+        - Other
+
+  - type: textarea
+    id: context
+    attributes:
+      label: Context / Why this site?
+      description: What makes this site interesting for a GEO audit?
+
+  - type: textarea
+    id: sarif
+    attributes:
+      label: Self-Run SARIF Output (optional)
+      description: |
+        Run `npx agentlens audit <url> --sarif` and paste the output here to speed up triage.
+      render: json
+
+  - type: checkboxes
+    id: consent
+    attributes:
+      label: Consent
+      options:
+        - label: I confirm this is a publicly accessible URL and I have permission to request an audit
+          required: true
+        - label: I understand results will be posted publicly in this issue
+          required: true

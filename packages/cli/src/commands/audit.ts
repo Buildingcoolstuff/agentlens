@@ -12,44 +12,74 @@ export interface AuditCommandOptions {
   badge?: boolean;
 }
 
-export async function auditCommand(url: string, options: AuditCommandOptions): Promise<void> {
+export async function auditCommand(urlOrPath: string, options: AuditCommandOptions): Promise<void> {
   const threshold = options.threshold ? parseInt(options.threshold, 10) : 80;
 
-  console.log(pc.bold(pc.cyan(`\n🔍 AgentLens — Auditing URL: ${pc.underline(url)}\n`)));
+  console.log(pc.bold(pc.cyan(`\n🔍 AgentLens — Auditing Target: ${pc.underline(urlOrPath)}\n`)));
 
   let rawHtml = '';
   let robotsTxt: string | null = null;
+  let targetUrl = urlOrPath;
 
-  try {
-    const res = await fetch(url, {
-      headers: {
-        'User-Agent': 'Mozilla/5.0 (compatible; AgentLens-AuditBot/1.0; +https://agentlens.dev)',
-        'Cache-Control': 'no-cache, no-store',
-      },
-    });
+  const localFilePath = path.resolve(process.cwd(), urlOrPath);
+  const isLocalFile = fs.existsSync(localFilePath) && fs.statSync(localFilePath).isFile();
 
-    if (!res.ok) {
-      console.error(pc.red(`✖ Failed to fetch URL: HTTP ${res.status} ${res.statusText}`));
+  if (isLocalFile) {
+    try {
+      rawHtml = fs.readFileSync(localFilePath, 'utf8');
+      targetUrl = `file://${localFilePath.replace(/\\/g, '/')}`;
+      console.log(pc.gray(`  Loaded local HTML file (${rawHtml.length} bytes)`));
+
+      // Check for local robots.txt in same directory, public/, or project root
+      const candidateRobots = [
+        path.join(path.dirname(localFilePath), 'robots.txt'),
+        path.join(process.cwd(), 'public', 'robots.txt'),
+        path.join(process.cwd(), 'robots.txt'),
+      ];
+      for (const rPath of candidateRobots) {
+        if (fs.existsSync(rPath) && fs.statSync(rPath).isFile()) {
+          robotsTxt = fs.readFileSync(rPath, 'utf8');
+          console.log(pc.gray(`  Loaded local robots.txt from: ${path.relative(process.cwd(), rPath)}`));
+          break;
+        }
+      }
+    } catch (err) {
+      console.error(pc.red(`✖ Failed to read local file: ${String(err)}`));
+      process.exit(1);
+    }
+  } else {
+    // Remote HTTP / HTTPS URL
+    try {
+      const res = await fetch(urlOrPath, {
+        headers: {
+          'User-Agent': 'Mozilla/5.0 (compatible; AgentLens-AuditBot/1.0; +https://agentlens.dev)',
+          'Cache-Control': 'no-cache, no-store',
+        },
+      });
+
+      if (!res.ok) {
+        console.error(pc.red(`✖ Failed to fetch URL: HTTP ${res.status} ${res.statusText}`));
+        process.exit(1);
+      }
+
+      rawHtml = await res.text();
+    } catch (err) {
+      console.error(pc.red(`✖ Network fetch error: ${String(err)}`));
       process.exit(1);
     }
 
-    rawHtml = await res.text();
-  } catch (err) {
-    console.error(pc.red(`✖ Network fetch error: ${String(err)}`));
-    process.exit(1);
-  }
-
-  // Fetch robots.txt
-  try {
-    const urlObj = new URL(url);
-    const robotsRes = await fetch(`${urlObj.origin}/robots.txt`, {
-      headers: { 'User-Agent': 'AgentLens-AuditBot/1.0' },
-    });
-    if (robotsRes.ok) {
-      robotsTxt = await robotsRes.text();
+    // Fetch robots.txt
+    try {
+      const urlObj = new URL(urlOrPath);
+      const robotsRes = await fetch(`${urlObj.origin}/robots.txt`, {
+        headers: { 'User-Agent': 'AgentLens-AuditBot/1.0' },
+      });
+      if (robotsRes.ok) {
+        robotsTxt = await robotsRes.text();
+      }
+    } catch {
+      // robots.txt fetch optional
     }
-  } catch {
-    // robots.txt fetch optional
   }
 
   // Load local facts.config.json if in same directory
@@ -66,7 +96,7 @@ export async function auditCommand(url: string, options: AuditCommandOptions): P
 
   // Execute deterministic scorer
   const report = auditAndScore({
-    targetUrl: url,
+    targetUrl,
     rawHtml,
     hydratedHtml: rawHtml, // CLI performs initial fetch inspection
     robotsTxt,

@@ -1,0 +1,68 @@
+name: "\U0001F680 Feature Request"
+description: Suggest a new capability or improvement for AgentLens
+title: "feat: <short description>"
+labels: ["enhancement", "needs triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## Feature requests welcome!
+        AgentLens is the open-source GEO & Agentic Web Engine. All improvements—new pillars,
+        new bot detections, new CLI commands, framework integrations—are on the table.
+
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area / Package
+      options:
+        - "@agentlens/core — Scoring Engine"
+        - "@agentlens/schema — NCS / facts.config.json"
+        - "@agentlens/runtime — Zero-CLS Continuity Bar"
+        - "@agentlens/mcp — IDE Integration"
+        - "agentlens CLI"
+        - "Chrome MV3 Extension"
+        - "New Package / Integration"
+        - "Documentation"
+        - "DX / Tooling"
+    validations:
+      required: true
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem Statement
+      description: What problem does this feature solve? Who is affected?
+      placeholder: "When Perplexity cites a site, it often strips the source entity context because the page opens with a bare pronoun ('It offers...'). There's no automated fix suggestion today."
+    validations:
+      required: true
+
+  - type: textarea
+    id: solution
+    attributes:
+      label: Proposed Solution
+      description: Describe the feature you'd like to see implemented.
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives Considered
+      description: What other approaches did you evaluate?
+
+  - type: dropdown
+    id: contribution
+    attributes:
+      label: Would you like to implement this?
+      options:
+        - "Yes — I'll open a PR"
+        - "Yes — but I need guidance"
+        - "No — looking for someone to pick this up"
+    validations:
+      required: true
+
+  - type: textarea
+    id: additional
+    attributes:
+      label: Additional Context
+      description: Links to related specs, prior art, or research.

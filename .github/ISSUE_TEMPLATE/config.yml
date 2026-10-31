@@ -1,0 +1,11 @@
+blank_issues_enabled: false
+contact_links:
+  - name: "\U0001F4AC AgentLens Discussions"
+    url: https://github.com/Buildingcoolstuff/agentlens/discussions
+    about: Ask questions, share GEO findings, and discuss the agentic web.
+  - name: "\U0001F4DA NCS v1 Specification"
+    url: https://github.com/Buildingcoolstuff/agentlens/blob/main/packages/schema/src/ncs.ts
+    about: Read the Negative Constraint Schema v1 specification.
+  - name: "\U0001F517 AgentLens on X / Twitter"
+    url: https://twitter.com/intent/tweet?text=I%20use%20AgentLens%20%40agentlens_geo%20for%20GEO%20%26%20agentic%20web%20readiness!
+    about: Share your GEO audit results with the community.

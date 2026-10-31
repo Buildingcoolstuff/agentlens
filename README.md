@@ -1,12 +1,26 @@
 # AgentLens (`agentlens`)
 
-> **The Open-Source Agentic Web & GEO Engine — Audit in the Browser, Compile in the Build, Orient at the Edge.**
+> **The Open-Source Generative Engine Optimization (GEO) & Agentic Web Engine — Audit in the Browser, Compile in the Build, Orient at the Edge.**
 
+<div align="center">
+
+[![CI](https://github.com/Buildingcoolstuff/agentlens/actions/workflows/ci.yml/badge.svg)](https://github.com/Buildingcoolstuff/agentlens/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Turborepo](https://img.shields.io/badge/monorepo-Turborepo-blue)](https://turbo.build/)
-[![TypeScript](https://img.shields.io/badge/TypeScript-5.7-blue.svg)](https://www.typescriptlang.org/)
+[![TypeScript Strict](https://img.shields.io/badge/TypeScript-5.7%20Strict-3178c6.svg)](https://www.typescriptlang.org/)
 [![pnpm](https://img.shields.io/badge/pnpm-12.x-orange.svg)](https://pnpm.io/)
-![Agent Readiness](https://img.shields.io/badge/Agent%20Readiness-94%2F100-emerald)
+[![Unit Tests](https://img.shields.io/badge/tests-36%20passed-brightgreen.svg)](https://github.com/Buildingcoolstuff/agentlens/actions)
+[![MCP Server](https://img.shields.io/badge/MCP-1.6.1-purple.svg)](https://modelcontextprotocol.io)
+
+[Features](#-the-generative-engine-optimization-geo-problem) •
+[Architecture](#-monorepo-architecture) •
+[7 Deterministic Pillars](#-the-7-deterministic-pillars) •
+[Quick Start](#-quick-start) •
+[Comparison Matrix](#-why-agentlens-vs-alternatives) •
+[MCP Server](#-ide-model-context-protocol-mcp-server) •
+[Contributing](#-contributing)
+
+</div>
 
 ---
 
@@ -20,6 +34,28 @@ However, **AI Search Crawlers** (such as `OAI-SearchBot`, `Claude-SearchBot`, `P
 3. **Fragmented Pronouns**: Content starting with "It features...", "They provide..." gets split into isolated RAG chunks where entity context is severed.
 
 **AgentLens solves this with 100% deterministic, zero-cost, local tooling.**
+
+```text
+[ Browser / DevTools ]           [ Build / CI Engine ]            [ Edge & Runtime ]
+   Chrome MV3 Extension            npx agentlens audit / compile    @agentlens/runtime
+   Pulsing Ghost Overlay  ───────▶ SARIF GitHub Code Scanning ───▶ Zero-CLS Continuity Bar
+   1-Click Fix Bundle              Deterministic 7-Pillars          W3C WebMCP Bridge
+```
+
+---
+
+## ⚖ Why AgentLens? (vs. Alternatives)
+
+| Feature | Traditional SEO (Lighthouse / Ahrefs) | LLM-as-a-Judge API Tools | **AgentLens** |
+|:---|:---:|:---:|:---:|
+| **Cost** | Free to \$99+/mo | \$0.03 – \$0.15 per page | **100% Free & Open Source ($0.00)** |
+| **Execution Environment** | Local / Cloud | Requires paid OpenAI/Anthropic API | **Runs 100% locally in Browser, Node, CI, Edge** |
+| **Deterministic Output** | Mixed | ❌ Non-deterministic (LLM drift) | **✅ 100% Identical outputs for identical inputs** |
+| **Next.js Suspense Traps** | ❌ Ignored | ❌ Misses streaming chunks | **✅ Detects `<div hidden id="S:...">` & `<template>`** |
+| **Negative Boundaries (NCS)**| ❌ None | ❌ Untracked | **✅ Enforces `ncs:v1` boundaries & review dates** |
+| **IDE MCP Integration** | ❌ None | ❌ Rare | **✅ Built-in stdio MCP server for Cursor/Claude** |
+| **AI Continuity Bar** | ❌ None | ❌ None | **✅ < 5 KB Zero-CLS floating widget** |
+| **WebMCP Browser Tools** | ❌ None | ❌ None | **✅ `navigator.modelContext` bridge** |
 
 ---
 
@@ -36,7 +72,7 @@ agentlens/
 ├── packages/
 │   ├── schema/        # @agentlens/schema - Zod schemas & types for facts.config.json, NCS v1, and Reports
 │   ├── core/          # @agentlens/core - Pure deterministic scoring, DOM diffing, RFC 9309 robots parser, NCS guard
-│   ├── runtime/       # @agentlens/runtime - < 2.8KB Zero-CLS AI Continuity Bar & WebMCP bridge
+│   ├── runtime/       # @agentlens/runtime - < 5KB Zero-CLS AI Continuity Bar & WebMCP bridge
 │   ├── cli/           # agentlens - CLI compiler (`npx agentlens init | audit | compile | sarif`) + Wikidata resolver
 │   └── mcp/           # @agentlens/mcp - Local stdio Model Context Protocol server for Cursor, Windsurf, Claude Code
 ├── apps/
@@ -55,14 +91,14 @@ AgentLens computes two reproducible headline scores:
 - **$\text{Blindness Gap} = S_{\text{render}} - S_{\text{fetch}}$**.
 
 | Pillar | Focus | Key Checks | Weight |
-|---|---|---|---|
+|---|---|---|:---:|
 | **1. Robots Access** | RFC 9309 Compliance | Evaluates `OAI-SearchBot`, `PerplexityBot`, `Claude-SearchBot`. User-action fetchers advisory; training crawlers badge-only. | 15% |
 | **2. Render Parity** | Dual-DOM Hydration | Next.js streaming suspense traps (`<div hidden id="S:...">`), 3-gram Shingle Jaccard, numeric token recall, Ghost Elements. | 25% |
 | **3. Quotability & Noise** | Fact vs. Puffery | First-30% direct answer density, fact verbs vs. marketing puffery buzzwords, bare-pronoun RAG fragmentation. | 15% |
 | **4. JSON-LD Graph** | Structured Data Integrity | Duplicate/conflicting `@type: Product` blocks (Shopify trap), `@id` cross-references, visible HTML markup parity. | 15% |
 | **5. Entity Freshness** | Authority Corroboration | Wikidata Q-ID verification via `sameAs`, `dateModified` freshness (< 365 days). | 10% |
 | **6. Negative Boundaries** | Boundary Protection | Negative Constraint Schema (`ncs:v1`), explicit `value: false` declarations, closed-world sets, `reviewBy` expiry. | 10% |
-| **7. Continuity & WebMCP** | Agent Interoperability | `< 2.8KB` Zero-CLS overlay, W3C WebMCP (`navigator.modelContext`) tool auto-registration, `[data-agent-section]` anchors. | 10% |
+| **7. Continuity & WebMCP** | Agent Interoperability | Zero-CLS overlay, W3C WebMCP (`navigator.modelContext`) tool auto-registration, `[data-agent-section]` anchors. | 10% |
 
 ---
 
@@ -88,9 +124,13 @@ Emits:
 - `agentlens-facts.php` (WordPress)
 
 ### 3. CI Audit & GitHub SARIF
-Audit your staging URL in GitHub Actions or locally:
+Audit your staging URL or local build artifact in GitHub Actions or locally:
 ```bash
+# Audit a live URL
 npx agentlens audit https://yourwebsite.com --threshold 80 --sarif
+
+# Audit a local HTML build artifact
+npx agentlens audit ./dist/index.html --threshold 80
 ```
 Fails CI (`exit 1`) if $S_{\text{fetch}} < 80$, if any Negative Constraint is expired, or if visible parity fails. Emits `agentlens.sarif` for GitHub Code Scanning annotations.
 
@@ -105,7 +145,7 @@ Connect AgentLens directly to **Cursor**, **Windsurf**, or **Claude Code**:
   "mcpServers": {
     "agentlens": {
       "command": "npx",
-      "args": ["@agentlens/mcp"]
+      "args": ["-y", "@agentlens/mcp"]
     }
   }
 }
@@ -140,6 +180,14 @@ pnpm build
 pnpm test
 pnpm check-types
 ```
+
+---
+
+## 🤝 Contributing
+
+We welcome community contributions! Please read our [Contributing Guide](./CONTRIBUTING.md) and [Code of Conduct](./CODE_OF_CONDUCT.md).
+
+Check out [Good First Issues](https://github.com/Buildingcoolstuff/agentlens/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22) to get started.
 
 ---
 

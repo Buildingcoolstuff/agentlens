@@ -1,0 +1,38 @@
+name: "\U0001F4DA Documentation Issue"
+description: Report missing, incorrect, or unclear documentation
+title: "docs: <short description>"
+labels: ["documentation"]
+body:
+  - type: dropdown
+    id: doc_type
+    attributes:
+      label: Documentation Area
+      options:
+        - README.md
+        - Package README (@agentlens/core, /schema, /runtime, /mcp, CLI)
+        - API / TypeScript types / JSDoc
+        - facts.config.json reference
+        - NCS v1 specification
+        - Contributing guide
+        - Examples / Garuda testbed
+        - Website / Landing page
+    validations:
+      required: true
+
+  - type: input
+    id: location
+    attributes:
+      label: File / URL
+      placeholder: "packages/core/README.md, line 42"
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: What's wrong or missing?
+    validations:
+      required: true
+
+  - type: textarea
+    id: suggestion
+    attributes:
+      label: Suggested improvement or correction

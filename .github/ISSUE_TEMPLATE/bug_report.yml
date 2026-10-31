@@ -1,0 +1,84 @@
+name: "\U0001F41B Bug Report"
+description: Report a reproducible bug or regression in AgentLens
+title: "bug: <short description>"
+labels: ["bug", "needs triage"]
+assignees: []
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## Before filing a bug
+        - Search [existing issues](https://github.com/Buildingcoolstuff/agentlens/issues) first.
+        - Try the latest version on `main` to confirm the bug still exists.
+
+  - type: dropdown
+    id: package
+    attributes:
+      label: Affected Package
+      description: Which AgentLens package is this bug in?
+      options:
+        - "@agentlens/core"
+        - "@agentlens/schema"
+        - "@agentlens/runtime"
+        - "@agentlens/mcp"
+        - "agentlens (CLI)"
+        - "Chrome Extension"
+        - "Monorepo / Build"
+        - "Documentation"
+        - "Not sure"
+    validations:
+      required: true
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Bug Description
+      description: A clear, concise description of what the bug is.
+      placeholder: "When I run `npx agentlens audit https://example.com`, the scorer returns S_fetch = 0 even though the page has 500 words in raw HTML..."
+    validations:
+      required: true
+
+  - type: textarea
+    id: repro
+    attributes:
+      label: Minimal Reproduction
+      description: Paste the smallest possible code snippet or CLI command that reproduces the bug.
+      render: shell
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected Behavior
+      placeholder: "S_fetch should be ≥ 60 given the raw HTML word count."
+    validations:
+      required: true
+
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual Behavior
+      placeholder: "Returns S_fetch = 0 with ruleId 'CSR_SHELL_GATE'."
+    validations:
+      required: true
+
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment
+      description: Fill in all relevant fields.
+      value: |
+        - OS:
+        - Node.js version:
+        - pnpm version:
+        - AgentLens version:
+        - Browser (if extension):
+    validations:
+      required: true
+
+  - type: textarea
+    id: additional
+    attributes:
+      label: Additional Context
+      description: Logs, screenshots, or links to the affected page.

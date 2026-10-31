@@ -230,6 +230,10 @@ export function diffDualDOM(rawHtml: string, hydratedHtml: string): HydrationDif
   const ghostElements: GhostElement[] = [];
   let suspenseTrapsCount = 0;
 
+  // Reset regex state to guarantee idempotence across concurrent / repeated invocations
+  NEXTJS_SUSPENSE_DIV_REGEX.lastIndex = 0;
+  NEXTJS_SUSPENSE_TEMPLATE_REGEX.lastIndex = 0;
+
   let suspenseMatch: RegExpExecArray | null;
   const rawHtmlCopy = rawHtml;
   while ((suspenseMatch = NEXTJS_SUSPENSE_DIV_REGEX.exec(rawHtmlCopy)) !== null) {
