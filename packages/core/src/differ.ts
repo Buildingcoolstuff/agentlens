@@ -171,12 +171,24 @@ function extractElements(html: string): ElementTagInfo[] {
   return results;
 }
 
-function buildCssSelector(el: ElementTagInfo): string {
-  if (el.id) return `#${el.id}`;
+/**
+ * Robust CSS selector builder that produces valid CSS selectors for any
+ * class names (including Tailwind classes with slashes or brackets) and numeric IDs.
+ */
+export function buildCssSelector(el: { tag: string; id?: string; className?: string }): string {
+  if (el.id) {
+    if (/^[a-zA-Z_][a-zA-Z0-9_-]*$/.test(el.id)) {
+      return `#${el.id}`;
+    }
+    return `[id="${el.id.replace(/["\\]/g, '\\$&')}"]`;
+  }
   if (el.className) {
     const firstClass = el.className.trim().split(/\s+/)[0];
-    if (firstClass && !firstClass.includes(':')) {
-      return `${el.tag}.${firstClass}`;
+    if (firstClass) {
+      if (/^[a-zA-Z_][a-zA-Z0-9_-]*$/.test(firstClass)) {
+        return `${el.tag}.${firstClass}`;
+      }
+      return `${el.tag}[class~="${firstClass.replace(/["\\]/g, '\\$&')}"]`;
     }
   }
   return el.tag;

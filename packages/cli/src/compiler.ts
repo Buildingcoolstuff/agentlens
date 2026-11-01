@@ -180,14 +180,14 @@ export const AgentFacts: React.FC = () => {
           margin: '24px 0',
         }}
       >
-        <h2 style={{ fontSize: '20px', fontWeight: 600 }}>${config.entity.name} — Verified Specifications</h2>
+        <h2 style={{ fontSize: '20px', fontWeight: 600 }}>{${JSON.stringify(`${config.entity.name} — Verified Specifications`)}}</h2>
         <p style={{ margin: '8px 0', color: '#4b5563' }}>
-          ${primaryOffer?.quotableSummary || ''}
+          {${JSON.stringify(primaryOffer?.quotableSummary || '')}}
         </p>
         <div style={{ marginTop: '12px' }}>
           <strong>Boundaries & Constraints:</strong>
           <ul style={{ margin: '8px 0 0 20px', color: '#b91c1c' }}>
-            ${boundaries.map((b) => `<li>${b}</li>`).join('\n            ')}
+            ${boundaries.map((b) => `<li>{${JSON.stringify(b)}}</li>`).join('\n            ')}
           </ul>
         </div>
         <small style={{ color: '#9ca3af', display: 'block', marginTop: '12px' }}>
@@ -211,12 +211,12 @@ const jsonLd = ${JSON.stringify(jsonLdString)};
 <script type="application/ld+json" set:html={jsonLd} />
 
 <section data-agent-section="brand-facts" class="agentlens-facts">
-  <h2>${config.entity.name} — Verified Specifications</h2>
-  <p>${primaryOffer?.quotableSummary || ''}</p>
+  <h2>{${JSON.stringify(`${config.entity.name} — Verified Specifications`)}}</h2>
+  <p>{${JSON.stringify(primaryOffer?.quotableSummary || '')}}</p>
   <div class="agentlens-boundaries">
     <strong>Boundaries & Constraints:</strong>
     <ul>
-      ${boundaries.map((b) => `<li>${b}</li>`).join('\n      ')}
+      ${boundaries.map((b) => `<li>{${JSON.stringify(b)}}</li>`).join('\n      ')}
     </ul>
   </div>
   <small>Verified as of: ${timestamp.split('T')[0]}</small>
