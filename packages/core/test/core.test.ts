@@ -282,4 +282,40 @@ describe('Full 7-Pillar Deterministic Scorer', () => {
     expect(report.pillars.renderParity.score).toBe(100);
     expect(report.deductions.length).toBeGreaterThanOrEqual(0);
   });
+
+  it('preserves query parameters in robots.txt matching per RFC 9309', () => {
+    const robotsTxt = `
+User-agent: *
+Disallow: /*?variant=
+Allow: /
+`;
+    // URL with query parameter should trigger Disallow
+    const reportBlocked = auditAndScore({
+      targetUrl: 'https://garuda.shoes/products?variant=123',
+      rawHtml: '<main><h1>Products</h1></main>',
+      robotsTxt,
+    });
+    expect(reportBlocked.pillars.robots.deductions.length).toBeGreaterThan(0);
+
+    // URL without query parameter should be Allowed
+    const reportAllowed = auditAndScore({
+      targetUrl: 'https://garuda.shoes/products',
+      rawHtml: '<main><h1>Products</h1></main>',
+      robotsTxt,
+    });
+    expect(reportAllowed.pillars.robots.deductions.length).toBe(0);
+  });
+});
+
+describe('CSS Selector Escaping (differ.ts)', () => {
+  it('generates valid CSS selectors for Tailwind classes and numeric IDs', async () => {
+    const { buildCssSelector } = await import('../src/index.js');
+
+    expect(buildCssSelector({ tag: 'span', className: 'w-1/2' })).toBe('span[class~="w-1/2"]');
+    expect(buildCssSelector({ tag: 'div', className: 'text-[14px]' })).toBe('div[class~="text-[14px]"]');
+    expect(buildCssSelector({ tag: 'button', className: 'p-2.5' })).toBe('button[class~="p-2.5"]');
+    expect(buildCssSelector({ tag: 'div', id: '123-product' })).toBe('[id="123-product"]');
+    expect(buildCssSelector({ tag: 'section', id: 'pricing' })).toBe('#pricing');
+    expect(buildCssSelector({ tag: 'p', className: 'description' })).toBe('p.description');
+  });
 });

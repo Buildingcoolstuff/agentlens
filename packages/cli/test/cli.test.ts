@@ -155,6 +155,18 @@ describe('agentlens CLI — Compiler Engine', () => {
     expect(llmsTxt).toContain('## Boundaries & Negative Constraints (ncs:v1)');
     expect(llmsTxt).toContain('WATERPROOF');
 
+    // Verify generated React component wraps strings safely in JSX expressions
+    const reactComponentPath = path.join(tmpDir, 'components', 'AgentFacts.tsx');
+    expect(fs.existsSync(reactComponentPath)).toBe(true);
+    const reactContent = fs.readFileSync(reactComponentPath, 'utf8');
+    expect(reactContent).toContain('{"TestCorp — Verified Specifications"}');
+
+    // Verify generated Astro component wraps strings safely
+    const astroComponentPath = path.join(tmpDir, 'components', 'AgentFacts.astro');
+    expect(fs.existsSync(astroComponentPath)).toBe(true);
+    const astroContent = fs.readFileSync(astroComponentPath, 'utf8');
+    expect(astroContent).toContain('{"TestCorp — Verified Specifications"}');
+
     // Clean up
     fs.rmSync(tmpDir, { recursive: true, force: true });
   });

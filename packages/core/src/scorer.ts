@@ -33,8 +33,14 @@ export interface AuditInput {
 
 export function auditAndScore(input: AuditInput): AgentLensReport {
   const startTime = Date.now();
-  const urlObj = new URL(input.targetUrl);
-  const pathname = urlObj.pathname || '/';
+  let pathname = '/';
+  try {
+    const urlObj = new URL(input.targetUrl);
+    // RFC 9309 Section 2.2.2: path comparison matches against path and query components
+    pathname = `${urlObj.pathname || '/'}${urlObj.search || ''}`;
+  } catch {
+    pathname = input.targetUrl.startsWith('/') ? input.targetUrl : `/${input.targetUrl}`;
+  }
 
   const rawHtml = input.rawHtml || '';
   const hydratedHtml = input.hydratedHtml || rawHtml;
