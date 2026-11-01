@@ -9,8 +9,9 @@
 [![Turborepo](https://img.shields.io/badge/monorepo-Turborepo-blue)](https://turbo.build/)
 [![TypeScript Strict](https://img.shields.io/badge/TypeScript-5.7%20Strict-3178c6.svg)](https://www.typescriptlang.org/)
 [![pnpm](https://img.shields.io/badge/pnpm-12.x-orange.svg)](https://pnpm.io/)
-[![Unit Tests](https://img.shields.io/badge/tests-36%20passed-brightgreen.svg)](https://github.com/Buildingcoolstuff/agentlens/actions)
+[![Unit Tests](https://img.shields.io/badge/tests-38%20passed-brightgreen.svg)](https://github.com/Buildingcoolstuff/agentlens/actions)
 [![MCP Server](https://img.shields.io/badge/MCP-1.6.1-purple.svg)](https://modelcontextprotocol.io)
+[![Good First Issues](https://img.shields.io/github/issues/Buildingcoolstuff/agentlens/%F0%9F%8C%B1%20good%20first%20issue?color=7057ff&label=good%20first%20issues)](https://github.com/Buildingcoolstuff/agentlens/issues?q=is%3Aissue+is%3Aopen+label%3A%22%F0%9F%8C%B1+good+first+issue%22)
 
 [Features](#-the-generative-engine-optimization-geo-problem) •
 [Architecture](#-monorepo-architecture) •
@@ -183,11 +184,15 @@ pnpm check-types
 
 ---
 
-## 🤝 Contributing
+## 🤝 Contributing & Community
 
-We welcome community contributions! Please read our [Contributing Guide](./CONTRIBUTING.md) and [Code of Conduct](./CODE_OF_CONDUCT.md).
+AgentLens is built by and for the developer community. Whether you are fixing a typo, polishing a CLI help screen, or extending our core deterministic analyzers, every contribution makes the agentic web more reliable.
 
-Check out [Good First Issues](https://github.com/Buildingcoolstuff/agentlens/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22) to get started.
+- 📖 **New here?** Read our [Contributing Guide](./CONTRIBUTING.md) and [Code of Conduct](./CODE_OF_CONDUCT.md).
+- 🌱 **Looking for an approachable issue?** Explore our [Good First Issues](https://github.com/Buildingcoolstuff/agentlens/issues?q=is%3Aissue+is%3Aopen+label%3A%22%F0%9F%8C%B1+good+first+issue%22) and [Beginner-Friendly Issues](https://github.com/Buildingcoolstuff/agentlens/issues?q=is%3Aissue+is%3Aopen+label%3A%22%F0%9F%8E%AF+beginner-friendly%22).
+- 🚀 **Seeking high-impact work?** Check out [Bounty-Ready Milestones](https://github.com/Buildingcoolstuff/agentlens/issues?q=is%3Aissue+is%3Aopen+label%3A%22%F0%9F%9A%80+bounty-ready%22) and [Help Wanted](https://github.com/Buildingcoolstuff/agentlens/issues?q=is%3Aissue+is%3Aopen+label%3A%22%F0%9F%A4%9D+help+wanted%22).
+
+Each issue comes with clear file pointers, reproduction steps, and mentoring tips to get your pull request reviewed and merged fast.
 
 ---
 
