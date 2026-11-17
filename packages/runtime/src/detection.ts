@@ -29,13 +29,31 @@ export function detectExplicitReferrer(): { detected: boolean; source: string | 
 
   try {
     const params = new URLSearchParams(window.location.search);
-    const utmSource = params.get('utm_source')?.toLowerCase();
-    const utmMedium = params.get('utm_medium')?.toLowerCase();
+    let utmSource = params.get('utm_source')?.toLowerCase();
+    let utmMedium = params.get('utm_medium')?.toLowerCase();
 
-    for (const domain of AI_DOMAINS) {
-      if (utmSource?.includes(domain.split('.')[0] || '') || utmMedium === 'ai-search' || utmSource === domain) {
-        return { detected: true, source: domain };
+    // Check hash for SPA hash-routed URLs (e.g. /#/product?utm_source=perplexity.ai)
+    if (!utmSource && window.location.hash && window.location.hash.includes('?')) {
+      const hashQuery = window.location.hash.slice(window.location.hash.indexOf('?') + 1);
+      if (hashQuery) {
+        const hashParams = new URLSearchParams(hashQuery);
+        utmSource = hashParams.get('utm_source')?.toLowerCase();
+        utmMedium = hashParams.get('utm_medium')?.toLowerCase();
       }
+    }
+
+    // Match explicit AI domain in utm_source
+    if (utmSource) {
+      for (const domain of AI_DOMAINS) {
+        if (utmSource === domain || utmSource.includes(domain.split('.')[0] || '')) {
+          return { detected: true, source: domain };
+        }
+      }
+    }
+
+    // Match generic ai-search medium
+    if (utmMedium === 'ai-search') {
+      return { detected: true, source: utmSource || 'ai-search' };
     }
 
     const referrer = document.referrer ? new URL(document.referrer).hostname.toLowerCase() : '';

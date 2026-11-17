@@ -1,7 +1,7 @@
 import { z } from 'zod';
 
-export const WIKIDATA_URI_REGEX = /^https:\/\/www\.wikidata\.org\/entity\/Q\d+$/;
-export const WIKIPEDIA_URI_REGEX = /^https:\/\/[a-z]{2,3}\.wikipedia\.org\/wiki\/.+$/;
+export const WIKIDATA_URI_REGEX = /^https?:\/\/(?:www\.)?wikidata\.org\/(?:entity|wiki)\/Q\d+$/;
+export const WIKIPEDIA_URI_REGEX = /^https?:\/\/[a-z0-9_-]+\.wikipedia\.org\/wiki\/.+$/;
 
 export const ReplacesEntitySchema = z.object({
   previousName: z.string().min(1, 'Previous name cannot be empty'),

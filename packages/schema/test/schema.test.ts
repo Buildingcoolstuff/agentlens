@@ -7,6 +7,8 @@ import {
   OfferingSchema,
   isConstraintExpired,
   validateSubjectFirst,
+  countWords,
+  startsWithBarePronoun,
 } from '../src/index.js';
 
 describe('@agentlens/schema — Negative Constraint Schema (NCS v1)', () => {
@@ -94,6 +96,31 @@ describe('@agentlens/schema — Entity Identity & Corroboration', () => {
     const res = EntityIdentitySchema.safeParse(invalid);
     expect(res.success).toBe(false);
   });
+
+  it('permits alternate canonical Wikidata and multilingual Wikipedia URLs (Issue #16)', () => {
+    const validVariants = [
+      'https://wikidata.org/entity/Q105638',
+      'https://www.wikidata.org/wiki/Q105638',
+      'http://wikidata.org/entity/Q105638',
+      'https://simple.wikipedia.org/wiki/Artificial_intelligence',
+      'https://zh-classical.wikipedia.org/wiki/AI',
+      'https://fr.wikipedia.org/wiki/Intelligence_artificielle',
+    ];
+
+    for (const url of validVariants) {
+      const res = EntityIdentitySchema.safeParse({
+        id: 'https://example.com/#org',
+        name: 'Example',
+        legalName: 'Example Inc',
+        url: 'https://example.com',
+        logo: 'https://example.com/logo.png',
+        foundingDate: '2020',
+        countryOfOrigin: 'US',
+        sameAs: [url],
+      });
+      expect(res.success, `Expected ${url} to be a valid sameAs authority URL`).toBe(true);
+    }
+  });
 });
 
 describe('@agentlens/schema — Product Offerings & Quotable Summaries', () => {
@@ -118,6 +145,20 @@ describe('@agentlens/schema — Product Offerings & Quotable Summaries', () => {
 
     const resValid = OfferingSchema.safeParse({ ...baseOffering, quotableSummary: validSummary });
     expect(resValid.success).toBe(true);
+  });
+
+  it('correctly handles non-breaking spaces and unicode whitespace in word count (Issue #23)', () => {
+    // 35 words separated by non-breaking spaces (\u00A0) and em-spaces (\u2003)
+    const wordsArray = Array.from({ length: 35 }, (_, i) => `Word${i}`);
+    const nbspText = wordsArray.join('\u00A0');
+    expect(countWords(nbspText)).toBe(35);
+
+    const mixedWhitespaceText = `First\u2003second\u00A0third\t\nfourth\u2009fifth`;
+    expect(countWords(mixedWhitespaceText)).toBe(5);
+
+    // Bare pronoun check with leading non-breaking space
+    expect(startsWithBarePronoun('\u00A0It\u00A0features a carbon plate')).toBe(true);
+    expect(startsWithBarePronoun('\u00A0Garuda\u00A0features a carbon plate')).toBe(false);
   });
 });
 

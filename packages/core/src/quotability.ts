@@ -84,13 +84,13 @@ const FACT_VERBS = [
 ];
 
 const NUMERIC_FACT_REGEX = /\b\d+(?:\.\d+)?\s*(?:kg|g|lbs|oz|km|miles|mph|fps|ms|sec|min|hours|gb|tb|mb|mah|wh|v|w|cm|mm|m|%|hz|khz|ghz|k|x)\b/gi;
-const CURRENCY_REGEX = /(?:[\$₹€£¥]\s*\d+(?:[.,]\d+)?|\b\d+(?:[.,]\d+)?\s*(?:usd|eur|inr|gbp)\b)/gi;
+const CURRENCY_REGEX = /(?:(?:[\$₹€£¥₩₪₫฿]|(?:\b(?:r\$|chf)\b))\s*\d+(?:[.,]\d+)?|\b\d+(?:[.,]\d+)?\s*(?:usd|eur|inr|gbp|cad|aud|jpy|chf|brl|cny|sek|nok|krw|nzd|sgd|hkd|pln|zar|try|ils|zł|kr)\b)/gi;
 const ISO_DATE_REGEX = /\b(?:\d{4}-\d{2}-\d{2}|(?:january|february|march|april|may|june|july|august|september|october|november|december)\s+\d{1,2},?\s+\d{4})\b/gi;
 const NCS_BOUNDARY_REGEX = /\b(?:cannot|does not|will not|not for|not available|not compatible|not affiliated|discontinued|dry road only|water resistant only)\b/gi;
 
 // Non-global regex predicates for idempotent sentence tests (avoids RegExp.lastIndex state mutation)
 const testNumericFact = (s: string) => /\b\d+(?:\.\d+)?\s*(?:kg|g|lbs|oz|km|miles|mph|fps|ms|sec|min|hours|gb|tb|mb|mah|wh|v|w|cm|mm|m|%|hz|khz|ghz|k|x)\b/i.test(s);
-const testCurrency = (s: string) => /(?:[\$₹€£¥]\s*\d+(?:[.,]\d+)?|\b\d+(?:[.,]\d+)?\s*(?:usd|eur|inr|gbp)\b)/i.test(s);
+const testCurrency = (s: string) => /(?:(?:[\$₹€£¥₩₪₫฿]|(?:\b(?:r\$|chf)\b))\s*\d+(?:[.,]\d+)?|\b\d+(?:[.,]\d+)?\s*(?:usd|eur|inr|gbp|cad|aud|jpy|chf|brl|cny|sek|nok|krw|nzd|sgd|hkd|pln|zar|try|ils|zł|kr)\b)/i.test(s);
 const testIsoDate = (s: string) => /\b(?:\d{4}-\d{2}-\d{2}|(?:january|february|march|april|may|june|july|august|september|october|november|december)\s+\d{1,2},?\s+\d{4})\b/i.test(s);
 const testNcsBoundary = (s: string) => /\b(?:cannot|does not|will not|not for|not available|not compatible|not affiliated|discontinued|dry road only|water resistant only)\b/i.test(s);
 

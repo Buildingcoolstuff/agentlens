@@ -319,3 +319,47 @@ describe('CSS Selector Escaping (differ.ts)', () => {
     expect(buildCssSelector({ tag: 'p', className: 'description' })).toBe('p.description');
   });
 });
+
+describe('International Currency Recognition (Issue #15)', () => {
+  it('recognizes global currencies in quotability fact analyzer', () => {
+    const html = `
+      <main>
+        <h1>Global E-Commerce</h1>
+        <p>The Australian edition is priced at 120 AUD and ships tomorrow.</p>
+        <p>The Tokyo edition is priced at 15000 JPY.</p>
+        <p>The Seoul model costs ₩150000.</p>
+        <p>The Stockholm model costs 450 kr.</p>
+        <p>The Zurich edition costs 180 CHF.</p>
+        <p>The Sao Paulo model is R$ 350.</p>
+      </main>
+    `;
+
+    const result = analyzeQuotability(html);
+    expect(result.factUnitsCount).toBeGreaterThanOrEqual(6);
+    expect(result.detectedFacts.length).toBeGreaterThanOrEqual(6);
+  });
+});
+
+describe('JSON-LD Price Parity Normalization (Issue #18)', () => {
+  it('matches formatted prices with commas, decimals, and European formatting', async () => {
+    const { isPricePresentInText } = await import('../src/index.js');
+
+    // JSON-LD has numeric 1250, visible text has "$1,250"
+    expect(isPricePresentInText(1250, 'USD', 'Buy now for $1,250.')).toBe(true);
+
+    // JSON-LD has "1250", visible text has "$1,250.00"
+    expect(isPricePresentInText('1250', 'USD', 'Special offer: $1,250.00 today')).toBe(true);
+
+    // JSON-LD has 1250, visible text has European dot "1.250 €"
+    expect(isPricePresentInText(1250, 'EUR', 'Preis: 1.250 € inkl. MwSt')).toBe(true);
+
+    // JSON-LD has 249.00, visible text has "$249"
+    expect(isPricePresentInText(249.00, 'USD', 'Priced at $249 only')).toBe(true);
+
+    // JSON-LD has 1250, visible text has Scandinavian space "1 250 kr"
+    expect(isPricePresentInText(1250, 'SEK', 'Endast 1 250 kr i butik')).toBe(true);
+
+    // Unrelated price should fail
+    expect(isPricePresentInText(9999, 'USD', 'Buy now for $1,250.')).toBe(false);
+  });
+});

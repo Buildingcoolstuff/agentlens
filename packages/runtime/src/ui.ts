@@ -78,9 +78,10 @@ export function extractPageFacts(): ContinuityData {
   for (const sec of sections) {
     const sectionName = sec.getAttribute('data-agent-section');
     if (sectionName) {
+      const sanitizedAttr = sectionName.replace(/["\\]/g, '\\$&');
       jumpChips.push({
         label: sectionName.charAt(0).toUpperCase() + sectionName.slice(1),
-        selectorOrHash: `[data-agent-section="${sectionName}"]`,
+        selectorOrHash: `[data-agent-section="${sanitizedAttr}"]`,
       });
     }
   }
@@ -266,9 +267,13 @@ export function mountContinuityBar(data: ContinuityData): () => void {
       const idx = Number(btn.getAttribute('data-idx'));
       const chip = data.jumpChips?.[idx];
       if (chip) {
-        const target = document.querySelector(chip.selectorOrHash);
-        if (target) {
-          target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        try {
+          const target = document.querySelector(chip.selectorOrHash);
+          if (target) {
+            target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          }
+        } catch {
+          // Gracefully ignore selector syntax errors
         }
       }
     });
@@ -281,10 +286,11 @@ export function mountContinuityBar(data: ContinuityData): () => void {
   return () => host.remove();
 }
 
-function escapeHtml(str: string): string {
+export function escapeHtml(str: string): string {
   return str
     .replace(/&/g, '&amp;')
     .replace(/</g, '&lt;')
     .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;');
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
 }
