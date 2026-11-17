@@ -14,12 +14,15 @@ export const BARE_PRONOUNS = new Set([
   'it', 'they', 'we', 'this', 'he', 'she', 'these', 'those', 'its', 'their', 'our', 'you',
 ]);
 
+const UNICODE_WHITESPACE_REGEX = /[\s\u00A0\u1680\u2000-\u200A\u2028\u2029\u202F\u205F\u3000\uFEFF]+/g;
+
 export function countWords(text: string): number {
-  return text.trim().split(/\s+/).filter(Boolean).length;
+  return text.replace(UNICODE_WHITESPACE_REGEX, ' ').trim().split(/\s+/).filter(Boolean).length;
 }
 
 export function startsWithBarePronoun(text: string): boolean {
-  const firstWord = text.trim().split(/\s+/)[0]?.toLowerCase().replace(/[^a-z]/g, '');
+  const normalized = text.replace(UNICODE_WHITESPACE_REGEX, ' ').trim();
+  const firstWord = normalized.split(/\s+/)[0]?.toLowerCase().replace(/[^a-z]/g, '');
   return firstWord ? BARE_PRONOUNS.has(firstWord) : false;
 }
 

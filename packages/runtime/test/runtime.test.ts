@@ -5,6 +5,7 @@ import {
   extractPageFacts,
   mountContinuityBar,
   registerWebMcpBridge,
+  escapeHtml,
 } from '../src/index.js';
 
 describe('@agentlens/runtime — AI Continuity & Arrival Detection', () => {
@@ -12,16 +13,44 @@ describe('@agentlens/runtime — AI Continuity & Arrival Detection', () => {
     document.body.innerHTML = '';
     // Reset window.__AGENTLENS_FACTS__
     delete (window as unknown as { __AGENTLENS_FACTS__?: unknown }).__AGENTLENS_FACTS__;
+    window.location.href = 'https://example.com/';
   });
 
   it('detects AI arrival via explicit query parameters (utm_source)', () => {
-    // Mock location
-    delete (window as unknown as { location?: unknown }).location;
-    window.location = new URL('https://example.com/product?utm_source=chatgpt.com&utm_medium=ai-search') as unknown as Location;
+    Object.defineProperty(window, 'location', {
+      value: new URL('https://example.com/product?utm_source=chatgpt.com&utm_medium=ai-search'),
+      writable: true,
+      configurable: true,
+    });
 
     const res = detectExplicitReferrer();
     expect(res.detected).toBe(true);
     expect(res.source).toBe('chatgpt.com');
+  });
+
+  it('detects AI arrival via SPA hash routes (Issue #20)', () => {
+    Object.defineProperty(window, 'location', {
+      value: new URL('https://example.com/#/product?utm_source=perplexity.ai&utm_medium=ai-search'),
+      writable: true,
+      configurable: true,
+    });
+
+    const res = detectExplicitReferrer();
+    expect(res.detected).toBe(true);
+    expect(res.source).toBe('perplexity.ai');
+  });
+
+  it('escapes single-quotes and HTML entities for attribute safety (Issue #21)', () => {
+    const rawInput = `<script>alert('xss');</script> "Hello" & 'World'`;
+    const escaped = escapeHtml(rawInput);
+
+    expect(escaped).not.toContain('<');
+    expect(escaped).not.toContain('>');
+    expect(escaped).not.toContain('"');
+    expect(escaped).not.toContain("'");
+    expect(escaped).toContain('&#39;');
+    expect(escaped).toContain('&quot;');
+    expect(escaped).toContain('&amp;');
   });
 
   it('extracts facts from window.__AGENTLENS_FACTS__ if present', () => {

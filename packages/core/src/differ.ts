@@ -31,7 +31,7 @@ const HTML_COMMENT_REGEX = /<!--[\s\S]*?-->/g;
 const HTML_TAG_REGEX = /<[^>]+>/g;
 
 // Currency symbols and numerical formats
-const CURRENCY_OR_NUMERIC_REGEX = /(?:[\$₹€£¥]\s*\d+(?:[.,]\d+)?|\b\d+(?:[.,]\d+)?\s*(?:%|kg|g|lbs|oz|km|miles|mph|fps|ms|sec|min|hours|gb|tb|mb|mah|wh|v|w|cm|mm|m)\b)/gi;
+const CURRENCY_OR_NUMERIC_REGEX = /(?:(?:[\$₹€£¥₩₪₫฿]|(?:\b(?:r\$|chf)\b))\s*\d+(?:[.,]\d+)?|\b\d+(?:[.,]\d+)?\s*(?:usd|eur|inr|gbp|cad|aud|jpy|chf|brl|cny|sek|nok|krw|nzd|sgd|hkd|pln|zar|try|ils|zł|kr|%|kg|g|lbs|oz|km|miles|mph|fps|ms|sec|min|hours|gb|tb|mb|mah|wh|v|w|cm|mm|m)\b)/gi;
 
 // Next.js App Router streaming markers
 const NEXTJS_SUSPENSE_DIV_REGEX = /<div\s+hidden\s+id="S:([^"]+)"[^>]*>([\s\S]*?)<\/div>/gi;
@@ -93,7 +93,7 @@ export function extractMainContent(html: string): { content: string; selector: s
 export function tokenizeWords(text: string): string[] {
   return text
     .toLowerCase()
-    .split(/[^a-z0-9₹$€£¥%.-]+/)
+    .split(/[^a-z0-9₹$€£¥₩₪₫฿%.-]+/)
     .filter((w) => w.length > 1);
 }
 

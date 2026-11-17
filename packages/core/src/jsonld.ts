@@ -251,9 +251,7 @@ export function auditJsonLd(rawHtml: string): JsonLdAuditResult {
     if (node.price !== undefined && node.price !== null) {
       parityChecksTotal++;
       const priceStr = String(node.price).trim();
-      const rawPriceFound =
-        visibleText.includes(priceStr) ||
-        (node.priceCurrency && visibleText.includes(`${priceStr} ${node.priceCurrency.toLowerCase()}`));
+      const rawPriceFound = isPricePresentInText(node.price, node.priceCurrency, visibleText);
 
       if (rawPriceFound) {
         parityChecksPassed++;
@@ -303,4 +301,67 @@ export function auditJsonLd(rawHtml: string): JsonLdAuditResult {
     parityIssues,
     syntaxErrors,
   };
+}
+
+/**
+ * Normalizes price variations (thousands commas, decimals, European dot separators)
+ * to verify parity between JSON-LD and visible HTML.
+ */
+export function isPricePresentInText(
+  priceRaw: string | number,
+  currency: string | undefined,
+  text: string
+): boolean {
+  const priceStr = String(priceRaw).trim();
+  const lowerText = text.toLowerCase();
+
+  // 1. Exact string match
+  if (lowerText.includes(priceStr.toLowerCase())) {
+    return true;
+  }
+
+  // 2. Exact with currency code
+  if (currency && lowerText.includes(`${priceStr.toLowerCase()} ${currency.toLowerCase()}`)) {
+    return true;
+  }
+
+  // 3. Numeric normalization for formatted prices
+  const cleanedNumStr = priceStr.replace(/[^0-9.]/g, '');
+  const num = parseFloat(cleanedNumStr);
+  if (!isNaN(num)) {
+    const intPart = Math.floor(num).toString();
+    const formattedUS = num.toLocaleString('en-US'); // "1,250"
+    const fixed2 = num.toFixed(2); // "1250.00"
+    const formattedUSFixed2 = num.toLocaleString('en-US', {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    }); // "1,250.00"
+    const formattedEU = num.toLocaleString('de-DE'); // "1.250"
+
+    const candidates = [
+      intPart,
+      formattedUS,
+      fixed2,
+      formattedUSFixed2,
+      formattedEU,
+      intPart.replace(/\B(?=(\d{3})+(?!\d))/g, ' '), // "1 250"
+    ];
+
+    for (const cand of candidates) {
+      if (lowerText.includes(cand.toLowerCase())) {
+        return true;
+      }
+    }
+
+    // Comma/dot/space grouped digits regex check for thousands
+    if (intPart.length >= 4) {
+      const thousandsPattern = intPart.replace(/(\d)(?=(\d{3})+$)/g, '$1[,.\\s]?');
+      const regex = new RegExp(`\\b${thousandsPattern}(?:[.,]00)?\\b`);
+      if (regex.test(lowerText)) {
+        return true;
+      }
+    }
+  }
+
+  return false;
 }
