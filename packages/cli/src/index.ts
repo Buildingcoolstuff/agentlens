@@ -1,4 +1,5 @@
 export * from './wikidata.js';
+export * from './banner.js';
 export * from './compiler.js';
 export * from './sarif.js';
 export * from './badge.js';

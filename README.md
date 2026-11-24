@@ -9,7 +9,7 @@
 [![Turborepo](https://img.shields.io/badge/monorepo-Turborepo-blue)](https://turbo.build/)
 [![TypeScript Strict](https://img.shields.io/badge/TypeScript-5.7%20Strict-3178c6.svg)](https://www.typescriptlang.org/)
 [![pnpm](https://img.shields.io/badge/pnpm-12.x-orange.svg)](https://pnpm.io/)
-[![Unit Tests](https://img.shields.io/badge/tests-44%20passed-brightgreen.svg)](https://github.com/Buildingcoolstuff/agentlens/actions)
+[![Unit Tests](https://img.shields.io/badge/tests-49%20passed-brightgreen.svg)](https://github.com/Buildingcoolstuff/agentlens/actions)
 [![MCP Server](https://img.shields.io/badge/MCP-1.6.1-purple.svg)](https://modelcontextprotocol.io)
 [![Good First Issues](https://img.shields.io/github/issues/Buildingcoolstuff/agentlens/%F0%9F%8C%B1%20good%20first%20issue?color=7057ff&label=good%20first%20issues)](https://github.com/Buildingcoolstuff/agentlens/issues?q=is%3Aissue+is%3Aopen+label%3A%22%F0%9F%8C%B1+good+first+issue%22)
 

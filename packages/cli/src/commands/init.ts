@@ -5,18 +5,35 @@ import { resolveWikidataEntity } from '../wikidata.js';
 import type { FactsConfig } from '@agentlens/schema';
 import { FactsConfigSchema } from '@agentlens/schema';
 
-export async function initCommand(urlOrBrand?: string): Promise<void> {
+export interface InitCommandOptions {
+  yes?: boolean;
+  name?: string;
+  domain?: string;
+  country?: string;
+  force?: boolean;
+}
+
+export async function initCommand(urlOrBrand?: string, options?: InitCommandOptions): Promise<void> {
   console.log(pc.bold(pc.cyan('\n🔍 AgentLens — Brand & Entity Initializer\n')));
 
-  let brandName = urlOrBrand;
-  let canonicalDomain = 'https://example.com';
+  const outputPath = path.join(process.cwd(), 'facts.config.json');
+  if (fs.existsSync(outputPath) && !options?.yes && !options?.force) {
+    console.log(pc.yellow(`⚠ facts.config.json already exists in ${process.cwd()}. Use --force or -y to overwrite.`));
+    return;
+  }
 
-  if (urlOrBrand && urlOrBrand.startsWith('http')) {
+  let brandName = options?.name || urlOrBrand;
+  let canonicalDomain = options?.domain || 'https://example.com';
+  const countryOfOrigin = (options?.country || 'US').toUpperCase();
+
+  if (!options?.domain && urlOrBrand && urlOrBrand.startsWith('http')) {
     try {
       const parsed = new URL(urlOrBrand);
       canonicalDomain = parsed.origin;
-      brandName = parsed.hostname.replace(/^www\./, '').split('.')[0] || 'MyBrand';
-      brandName = brandName.charAt(0).toUpperCase() + brandName.slice(1);
+      if (!options?.name) {
+        const extracted = parsed.hostname.replace(/^www\./, '').split('.')[0] || 'MyBrand';
+        brandName = extracted.charAt(0).toUpperCase() + extracted.slice(1);
+      }
     } catch {
       // fallback
     }
@@ -65,7 +82,7 @@ export async function initCommand(urlOrBrand?: string): Promise<void> {
       url: canonicalDomain,
       logo: `${canonicalDomain}/logo.png`,
       foundingDate: '2024-01-01',
-      countryOfOrigin: 'US',
+      countryOfOrigin,
       sameAs,
     },
     offerings: [
@@ -77,7 +94,7 @@ export async function initCommand(urlOrBrand?: string): Promise<void> {
         priceCurrency: 'USD',
         availability: 'InStock',
         asOf: new Date().toISOString().split('T')[0]!,
-        quotableSummary: `${brandName} Core Engine is a deterministic AI retrieval and generative engine optimization toolkit designed to provide verified facts, prices, and negative constraints directly to web crawlers and browser-resident agents.`,
+        quotableSummary: `${brandName} Core Engine is a production-grade, deterministic AI retrieval and generative engine optimization toolkit designed to provide verified facts, prices, and negative constraints directly to web crawlers, search engines, and browser-resident autonomous agents for verifiable answer grounding.`,
         specs: {
           runtime: 'Edge / Browser',
           bundleSize: '< 2.8KB',
@@ -114,7 +131,6 @@ export async function initCommand(urlOrBrand?: string): Promise<void> {
   // Validate with Zod
   FactsConfigSchema.parse(sampleConfig);
 
-  const outputPath = path.join(process.cwd(), 'facts.config.json');
   fs.writeFileSync(outputPath, JSON.stringify(sampleConfig, null, 2), 'utf8');
 
   console.log(pc.green(`\n🎉 Successfully generated: ${pc.bold('facts.config.json')}`));

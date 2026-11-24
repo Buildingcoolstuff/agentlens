@@ -2,6 +2,8 @@ import { describe, it, expect } from 'vitest';
 import { generateSvgBadge } from '../src/badge.js';
 import { generateSarifReport } from '../src/sarif.js';
 import { runCompile } from '../src/compiler.js';
+import { getAsciiBanner } from '../src/banner.js';
+import { initCommand } from '../src/commands/init.js';
 import type { AgentLensReport, FactsConfig } from '@agentlens/schema';
 import fs from 'node:fs';
 import path from 'node:path';
@@ -169,5 +171,55 @@ describe('agentlens CLI — Compiler Engine', () => {
 
     // Clean up
     fs.rmSync(tmpDir, { recursive: true, force: true });
+  });
+});
+
+describe('agentlens CLI — ASCII Banner (Issue #28)', () => {
+  it('renders stylized banner and subtitle', () => {
+    const banner = getAsciiBanner();
+    expect(banner).toContain('AgentLens');
+    expect(banner).toContain('The Open-Source Agentic Web & GEO Engine');
+  });
+
+  it('respects NO_COLOR environment variable', () => {
+    const prev = process.env.NO_COLOR;
+    process.env.NO_COLOR = '1';
+    const banner = getAsciiBanner();
+    expect(banner).toContain('The Open-Source Agentic Web & GEO Engine');
+    if (prev === undefined) {
+      delete process.env.NO_COLOR;
+    } else {
+      process.env.NO_COLOR = prev;
+    }
+  });
+});
+
+describe('agentlens CLI — Non-Interactive Init Wizard (Issue #24)', () => {
+  it('generates facts.config.json non-interactively with custom flags', async () => {
+    const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'agentlens-init-'));
+    const prevCwd = process.cwd();
+    process.chdir(tmpDir);
+
+    try {
+      await initCommand(undefined, {
+        yes: true,
+        name: 'HyperDrive',
+        domain: 'https://hyperdrive.dev',
+        country: 'GB',
+        force: true,
+      });
+
+      const configPath = path.join(tmpDir, 'facts.config.json');
+      expect(fs.existsSync(configPath)).toBe(true);
+
+      const generated = JSON.parse(fs.readFileSync(configPath, 'utf8')) as FactsConfig;
+      expect(generated.entity.name).toBe('HyperDrive');
+      expect(generated.site.canonicalDomain).toBe('https://hyperdrive.dev');
+      expect(generated.entity.countryOfOrigin).toBe('GB');
+      expect(generated.ncs?.constraints.length).toBeGreaterThan(0);
+    } finally {
+      process.chdir(prevCwd);
+      fs.rmSync(tmpDir, { recursive: true, force: true });
+    }
   });
 });
