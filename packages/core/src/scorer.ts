@@ -80,6 +80,20 @@ export function auditAndScore(input: AuditInput): AgentLensReport {
     } else {
       pillarRobotsPassed.push('All major AI search bots (OAI-SearchBot, PerplexityBot, Claude-SearchBot) are permitted.');
     }
+
+    if (robotsAudit.crawlDelay !== undefined && robotsAudit.crawlDelay > 5) {
+      const ded: Deduction = {
+        ruleId: 'ROBOTS_HIGH_CRAWL_DELAY',
+        pillar: 'robots',
+        severity: 'low',
+        lostPoints: 5,
+        title: 'High Crawl-Delay in robots.txt',
+        evidence: `Crawl-delay set to ${robotsAudit.crawlDelay} seconds in robots.txt`,
+        exactFix: 'Reduce Crawl-delay to <= 5 seconds or exempt AI search bots to prevent delayed re-indexing.',
+      };
+      pillarRobotsDeductions.push(ded);
+      deductions.push(ded);
+    }
   } else {
     pillarRobotsPassed.push('No restrictive robots.txt found (default allow all per RFC 9309).');
   }

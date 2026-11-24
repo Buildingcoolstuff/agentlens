@@ -154,6 +154,7 @@ export interface UserAgentGroup {
 export interface RobotsParsed {
   groups: UserAgentGroup[];
   sitemaps: string[];
+  crawlDelay?: number;
 }
 
 export interface BotAccessResult {
@@ -175,6 +176,8 @@ export interface RobotsAuditResult {
   allSearchBotsAllowed: boolean;
   policyBadges: Array<{ bot: string; allowed: boolean; category: BotCategory }>;
   sitemaps: string[];
+  crawlDelay?: number;
+  advisories?: string[];
 }
 
 /**
@@ -209,6 +212,7 @@ export function parseRobotsTxt(content: string): RobotsParsed {
   const lines = content.split(/\r?\n/);
   const groups: UserAgentGroup[] = [];
   const sitemaps: string[] = [];
+  let crawlDelay: number | undefined;
 
   let currentAgents: string[] = [];
   let currentRules: RobotRule[] = [];
@@ -266,11 +270,16 @@ export function parseRobotsTxt(content: string): RobotsParsed {
       if (value) {
         sitemaps.push(value);
       }
+    } else if (key === 'crawl-delay') {
+      const delay = parseFloat(value);
+      if (!isNaN(delay)) {
+        crawlDelay = delay;
+      }
     }
   }
 
   flushGroup();
-  return { groups, sitemaps };
+  return { groups, sitemaps, crawlDelay };
 }
 
 /**
@@ -416,6 +425,13 @@ export function auditRobotsForPath(robotsContent: string | null, pathname: strin
     }
   }
 
+  const advisories: string[] = [];
+  if (parsed.crawlDelay !== undefined && parsed.crawlDelay > 5) {
+    advisories.push(
+      `High crawl-delay detected (${parsed.crawlDelay} seconds). AI search fetchers may throttle live re-indexing.`
+    );
+  }
+
   return {
     isAvailable: true,
     botResults,
@@ -424,5 +440,7 @@ export function auditRobotsForPath(robotsContent: string | null, pathname: strin
     allSearchBotsAllowed: searchBotsBlockedCount === 0,
     policyBadges,
     sitemaps: parsed.sitemaps,
+    crawlDelay: parsed.crawlDelay,
+    advisories,
   };
 }

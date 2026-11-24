@@ -363,3 +363,47 @@ describe('JSON-LD Price Parity Normalization (Issue #18)', () => {
     expect(isPricePresentInText(9999, 'USD', 'Buy now for $1,250.')).toBe(false);
   });
 });
+
+describe('Marketing Puffery Lexicon Expansion (Issue #26)', () => {
+  it('detects corporate buzzwords and flags them as noise', () => {
+    const buzzwordHtml = `
+      <main>
+        <h1>Next-Gen Cloud Platform</h1>
+        <p>Our turnkey, frictionless solution offers hyper-growth and mission-critical capabilities.</p>
+        <p>Experience future-proof, all-in-one architecture designed for industry-leading performance.</p>
+        <p>We deliver bespoke, transformative, bulletproof, and phenomenal results.</p>
+      </main>
+    `;
+
+    const result = analyzeQuotability(buzzwordHtml);
+    expect(result.noiseUnitsCount).toBeGreaterThanOrEqual(10);
+    expect(result.detectedPuffery).toContain('turnkey');
+    expect(result.detectedPuffery).toContain('frictionless');
+    expect(result.detectedPuffery).toContain('hypergrowth');
+    expect(result.detectedPuffery).toContain('missioncritical');
+    expect(result.detectedPuffery).toContain('futureproof');
+  });
+});
+
+describe('Robots.txt Crawl-Delay Advisory (Issue #31)', () => {
+  it('parses crawl-delay directive and generates advisory for high delays', () => {
+    const robotsTxtWithHighDelay = `
+User-agent: *
+Crawl-delay: 10
+Allow: /
+`;
+    const auditHigh = auditRobotsForPath(robotsTxtWithHighDelay, '/');
+    expect(auditHigh.crawlDelay).toBe(10);
+    expect(auditHigh.advisories?.length).toBeGreaterThan(0);
+    expect(auditHigh.advisories?.[0]).toContain('High crawl-delay detected (10 seconds)');
+
+    const robotsTxtWithLowDelay = `
+User-agent: *
+Crawl-delay: 2
+Allow: /
+`;
+    const auditLow = auditRobotsForPath(robotsTxtWithLowDelay, '/');
+    expect(auditLow.crawlDelay).toBe(2);
+    expect(auditLow.advisories?.length).toBe(0);
+  });
+});

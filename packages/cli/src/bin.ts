@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 import { Command } from 'commander';
-import { initCommand } from './commands/init.js';
+import { getAsciiBanner } from './banner.js';
+import { initCommand, type InitCommandOptions } from './commands/init.js';
 import { compileCommand } from './commands/compile.js';
 import { auditCommand } from './commands/audit.js';
 
@@ -9,13 +10,19 @@ const program = new Command();
 program
   .name('agentlens')
   .description('The Open-Source Agentic Web & GEO Engine — Audit in the Browser, Compile in the Build, Orient at the Edge.')
-  .version('1.0.0');
+  .version('1.0.0')
+  .addHelpText('before', () => getAsciiBanner());
 
 program
   .command('init [target]')
   .description('Initialize facts.config.json by querying the public Wikidata SPARQL / Search API')
-  .action(async (target?: string) => {
-    await initCommand(target);
+  .option('-y, --yes', 'Non-interactive mode with automatic defaults', false)
+  .option('--name <brand>', 'Explicit brand or organization entity name')
+  .option('--domain <url>', 'Canonical website domain (e.g. https://example.com)')
+  .option('--country <code2>', 'Country of origin ISO alpha-2 code (e.g. US, IN, GB)')
+  .option('--force', 'Overwrite existing facts.config.json without warning', false)
+  .action(async (target?: string, opts?: InitCommandOptions) => {
+    await initCommand(target, opts);
   });
 
 program
