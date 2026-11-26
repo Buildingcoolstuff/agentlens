@@ -1,15 +1,18 @@
 import fs from 'node:fs';
 import path from 'node:path';
+import { pathToFileURL } from 'node:url';
 import pc from 'picocolors';
 import { auditAndScore } from '@agentlens/core';
 import type { FactsConfig } from '@agentlens/schema';
 import { generateSarifReport } from '../sarif.js';
 import { generateSvgBadge } from '../badge.js';
+import { renderHydratedDom } from '../render.js';
 
 export interface AuditCommandOptions {
   sarif?: boolean;
   threshold?: string;
   badge?: boolean;
+  render?: boolean;
 }
 
 export async function auditCommand(urlOrPath: string, options: AuditCommandOptions): Promise<void> {
@@ -27,7 +30,7 @@ export async function auditCommand(urlOrPath: string, options: AuditCommandOptio
   if (isLocalFile) {
     try {
       rawHtml = fs.readFileSync(localFilePath, 'utf8');
-      targetUrl = `file://${localFilePath.replace(/\\/g, '/')}`;
+      targetUrl = pathToFileURL(localFilePath).href;
       console.log(pc.gray(`  Loaded local HTML file (${rawHtml.length} bytes)`));
 
       // Check for local robots.txt in same directory, public/, or project root
@@ -82,6 +85,23 @@ export async function auditCommand(urlOrPath: string, options: AuditCommandOptio
     }
   }
 
+  // Headless Browser Rendering (Dual-DOM Mode)
+  let hydratedHtml = rawHtml;
+  let renderInfo: string | null = null;
+
+  if (options.render) {
+    console.log(pc.cyan('  🌐 Launching headless browser to capture hydrated DOM...'));
+    const renderResult = await renderHydratedDom(targetUrl);
+    if (renderResult.success && renderResult.html) {
+      hydratedHtml = renderResult.html;
+      renderInfo = `${renderResult.renderedVia} (${renderResult.durationMs}ms, ${hydratedHtml.length} bytes)`;
+      console.log(pc.gray(`  ✔ Hydrated DOM captured via ${renderInfo}`));
+    } else {
+      console.warn(pc.yellow(`  ⚠ Headless render skipped: ${renderResult.error ?? 'Unknown error'}`));
+      console.warn(pc.gray('    Falling back to static raw HTML for audit.'));
+    }
+  }
+
   // Load local facts.config.json if in same directory
   let ncsConfig: FactsConfig['ncs'] | undefined;
   const localConfigPath = path.join(process.cwd(), 'facts.config.json');
@@ -98,21 +118,36 @@ export async function auditCommand(urlOrPath: string, options: AuditCommandOptio
   const report = auditAndScore({
     targetUrl,
     rawHtml,
-    hydratedHtml: rawHtml, // CLI performs initial fetch inspection
+    hydratedHtml,
     robotsTxt,
     ncsConfig,
   });
 
   // Print Header Scores
   const fetchBadge =
-    report.sFetch >= 80 ? pc.bgGreen(pc.black(` S_fetch: ${report.sFetch}/100 `)) :
-    report.sFetch >= 60 ? pc.bgYellow(pc.black(` S_fetch: ${report.sFetch}/100 `)) :
-    pc.bgRed(pc.white(` S_fetch: ${report.sFetch}/100 `));
+    report.sFetch >= 80
+      ? pc.bgGreen(pc.black(` S_fetch: ${report.sFetch}/100 `))
+      : report.sFetch >= 60
+        ? pc.bgYellow(pc.black(` S_fetch: ${report.sFetch}/100 `))
+        : pc.bgRed(pc.white(` S_fetch: ${report.sFetch}/100 `));
 
-  const renderBadge = pc.bgBlue(pc.white(` S_render: ${report.sRender}/100 `));
-  const gapBadge = report.blindnessGap > 15 ? pc.red(`Crawler Blindness Gap: ${report.blindnessGap} pts`) : pc.green(`Blindness Gap: ${report.blindnessGap} pts`);
+  const renderBadge =
+    report.sRender >= 80
+      ? pc.bgGreen(pc.black(` S_render: ${report.sRender}/100 `))
+      : report.sRender >= 60
+        ? pc.bgYellow(pc.black(` S_render: ${report.sRender}/100 `))
+        : pc.bgRed(pc.white(` S_render: ${report.sRender}/100 `));
 
-  console.log(`  ${fetchBadge}  ${renderBadge}  [ ${gapBadge} ]\n`);
+  const gapBadge =
+    report.blindnessGap > 15
+      ? pc.red(`Crawler Blindness Gap: ΔS = ${report.blindnessGap} pts`)
+      : pc.green(`Blindness Gap: ΔS = ${report.blindnessGap} pts`);
+
+  console.log(`  ${fetchBadge}  ${renderBadge}  [ ${gapBadge} ]`);
+  if (renderInfo) {
+    console.log(pc.gray(`  Mode: Dual-DOM Headless Render [${renderInfo}]`));
+  }
+  console.log('');
 
   // Print 7-Pillar Breakdown
   console.log(pc.bold('📊 7-Pillar Diagnostic Breakdown:'));
@@ -126,6 +161,23 @@ export async function auditCommand(urlOrPath: string, options: AuditCommandOptio
     );
   }
   console.log('─'.repeat(64));
+
+  // Print Ghost Elements (Dual-DOM diff)
+  if (report.ghostElements && report.ghostElements.length > 0) {
+    console.log(pc.bold(pc.magenta(`\n👻 Ghost Elements & Hydration Traps (${report.ghostElements.length} detected):`)));
+    console.log(pc.gray('  (Elements visible in browser DOM but missing from raw initial HTML)'));
+    for (const ghost of report.ghostElements.slice(0, 10)) {
+      const badge =
+        ghost.severity === 'critical'
+          ? pc.bgRed(pc.white(` ${ghost.category.toUpperCase()} `))
+          : pc.bgYellow(pc.black(` ${ghost.category.toUpperCase()} `));
+      console.log(`  ${badge} ${pc.bold(ghost.selector)}: "${pc.italic(ghost.text)}"`);
+      console.log(`    ${pc.gray('Reason:')} ${ghost.reason}`);
+    }
+    if (report.ghostElements.length > 10) {
+      console.log(pc.gray(`    ... and ${report.ghostElements.length - 10} more ghost elements.`));
+    }
+  }
 
   // Print Deductions
   if (report.deductions.length > 0) {
