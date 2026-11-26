@@ -38,7 +38,8 @@ program
   .option('--sarif', 'Emit GitHub Actions SARIF v2.1.0 log')
   .option('--threshold <score>', 'Minimum S_fetch score required for CI exit 0 (default: 80)', '80')
   .option('--badge', 'Generate dynamic SVG shield badge', true)
-  .action(async (url: string, opts: { sarif?: boolean; threshold?: string; badge?: boolean }) => {
+  .option('--render', 'Launch headless browser to capture hydrated DOM and evaluate true blindness gap', false)
+  .action(async (url: string, opts: { sarif?: boolean; threshold?: string; badge?: boolean; render?: boolean }) => {
     await auditCommand(url, opts);
   });
 
